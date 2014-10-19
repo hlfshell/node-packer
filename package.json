@@ -1,0 +1,14 @@
+{
+  "name": "packerio",
+  "version": "0.0.0",
+  "description": "Packer.io wrapper library.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "packer.io"
+  ],
+  "author": "Keith Chester <kchester@gmail.com>",
+  "license": "BSD-2-Clause"
+}
