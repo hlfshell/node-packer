@@ -1,4 +1,4 @@
-var packerCmd = require('./packerCmd'),
+var packerCmd = require('./packerCmd')(),
   fs = require('fs')
 
 module.exports = function(){
@@ -11,7 +11,7 @@ module.exports = function(){
       builders = [] of builders
       provisioners = [] of provisioners
       post-processors = [] of postProcessors
-      variables = [] of variables
+      variables = {} typical object
       fileDirectory = By default, './'
 
     Methods:
@@ -21,11 +21,15 @@ module.exports = function(){
 
   */
   var PackerFile = function(opts){
+    if(!opts){
+      opts = {}
+    }
+
     this.filename = opts.filename
-    this.builders = opts.builders
-    this.provisioners = opts.provisioners
-    this['post-processors'] = opts['post-processors']
-    this.variables = opts.variables
+    this.builders = opts.builders || []
+    this.provisioners = opts.provisioners || []
+    this['post-processors'] = opts['post-processors'] || []
+    this.variables = opts.variables || {}
 
     this.fileDirectory = opts.fileDirectory || './'
 
@@ -34,20 +38,21 @@ module.exports = function(){
     }
   }
 
-  Packerfile.prototype.write = function(cb){
-      if(!this.filename){
-        //Generate a random filename
-        this.filename = this.fileDirectory + '/' + Math.random().toString(36).slice(2) + '.json'
-      }
+  PackerFile.prototype.write = function(cb){
+    var self = this
+    if(!self.filename){
+      //Generate a random filename
+      self.filename = Math.random().toString(36).slice(2) + '.json'
+    }
 
-      fs.writeFile(this.filename, JSON.stringify(
-        {
-          variables: this.variables,
-          builders: this.builders,
-          provisioners: this.provisioners,
-          "post-processors": this['post-Processors']
-        }
-      ), cb)
+    fs.writeFile(self.fileDirectory + '/' + self.filename, JSON.stringify(
+      {
+        variables: self.variables,
+        builders: self.builders,
+        provisioners: self.provisioners,
+        "post-processors": self['post-Processors']
+      }
+    ), cb)
   }
 
   //Build will either use the file in the filename (if it exists) and execute OR
@@ -55,20 +60,21 @@ module.exports = function(){
   //via a clean.
   //opts is optional and appended to the build at call time
   PackerFile.prototype.build = function(opts, cb){
+    self = this
     if(typeof opts == 'function'){
       cb = opts
       opts = null
     }
 
-    if(this.filename){
-      packerCmd.build(this.fileDirectory + '/' + this.filename, opts, cb)
+    if(self.filename){
+      packerCmd.build(self.fileDirectory + '/' + self.filename, opts, cb)
     } else {
-      this.write(function(err){
+      self.write(function(err){
         if(err){
           cb(err)
         } else {
-          packerCmd.build(this.fileDirectory + '/' + this.filename, opts, function(err, output){
-            err ? cb(err, output) : this.clean(function(err){
+          packerCmd.build(self.fileDirectory + '/' + self.filename, opts, function(err, output){
+            err ? cb(err, output) : self.clean(function(err){
               cb(err, output)
             })
           })
@@ -79,16 +85,17 @@ module.exports = function(){
 
   //Read the current set filename and set its values to the current PackerFile object
   PackerFile.prototype.read = function(cb){
+    var self = this
     if(filename){
-      fs.readFile(this.fileDirectory + '/' + this.filename, function(err, data){
+      fs.readFile(self.fileDirectory + '/' + self.filename, function(err, data){
         if(err){
           cb(err)
         } else {
           var packerFile = JSON.parse(data)
 
-          this.builders = results.builders || []
-          this.provisioners = results.provisioners || []
-          this['post-processors'] = results['post-processors'] || []
+          self.builders = results.builders || []
+          self.provisioners = results.provisioners || []
+          self['post-processors'] = results['post-processors'] || []
 
           cb(null)
         }
@@ -99,9 +106,10 @@ module.exports = function(){
   }
 
   //If the filename exists, destory the file
-  Packerfile.prototype.clean = function(cb){
-    if(this.filename){
-      fs.unlink(this.fileDirectory + '/' + this.filename, cb)
+  PackerFile.prototype.clean = function(cb){
+    var self = this
+    if(self.filename){
+      fs.unlink(self.fileDirectory + '/' + self.filename, cb)
     } else {
       cb(null)
     }
@@ -111,8 +119,9 @@ module.exports = function(){
   //Generic Builder
   //No validation, easy function, etc.
   PackerFile.prototype.addBuilder = function(builderType, opts){
+    var self = this
     if(typeof builderType == 'object'){
-      this.builders.push(builderType)
+      self.builders.push(builderType)
     } else {
       var builder = {
         type: builderType
@@ -123,14 +132,15 @@ module.exports = function(){
         })
       }
 
-      this.builders.push(builder)
+      self.builders.push(builder)
     }
   }
 
   //Amazon helper function
-  Packerfile.prototype.addAmazonEBS = function(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts){
+  PackerFile.prototype.addAmazonEBS = function(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts){
+    var self = this
     if(typeof access_key == 'object'){
-      this.addBuilder('amazon-ebs', access_key)
+      self.addBuilder('amazon-ebs', access_key)
     } else {
       opts = opts || {}
       opts.ami_name = opts.ami_name || 'Packer.io generated instance - ' + (new Date()).getTime()
@@ -140,7 +150,7 @@ module.exports = function(){
       opts.region = region
       opts.source_ami = source_ami
       opts.ssh_username = ssh_username
-      this.addBuilder('amazon-ebs', opts)
+      self.addBuilder('amazon-ebs', opts)
     }
   }
 
@@ -148,15 +158,16 @@ module.exports = function(){
   //PROVISIONERS
 
   PackerFile.prototype.addProvisioner = function(provisionerType, opts){
+    var self = this
     if(typeof provisionerType == 'object'){
-      this.provisioners.push(provisionerType)
+      self.provisioners.push(provisionerType)
     } else {
       if(!opts){
         opts = {}
       }
       opts.type = provisionerType
 
-      this.provisioners.push(opts)
+      self.provisioners.push(opts)
     }
   }
 
@@ -165,6 +176,7 @@ module.exports = function(){
   //be an issue with a single PackerFile called by multiple functions simultaneously,
   //then force = true prevents this behavior.
   PackerFile.prototype.shellCmd = function(cmds, force){
+    var self = this
     //If the input is a string, make it an array to avoid rewriting code here
     if(typeof cmds == 'string'){
       cmds = [cmds]
@@ -172,15 +184,14 @@ module.exports = function(){
 
     //If the last provisioner is currently a shell script, add to it
     if(!force &&
-      this.provisioners.length > 0 &&
-      this.provisioners[this.provisioners.length - 1].type == 'shell'){
-
+      self.provisioners.length > 0 &&
+      self.provisioners[this.provisioners.length - 1].type == 'shell'){
         cmds.forEach(function(cmd){
-          this.provisioners[this.provisions.length - 1].inline.push(cmd)
+          self.provisioners[self.provisioners.length - 1].inline.push(cmd)
         })
 
     } else {
-      this.provisioners.push({
+      self.provisioners.push({
         type: 'shell',
         inline: cmds
       })
@@ -188,7 +199,8 @@ module.exports = function(){
   }
 
   PackerFile.prototype.uploadFile = function(source, destination){
-    this.provisioners.push({
+    var self = this
+    self.provisioners.push({
       type: 'file',
       source: source,
       destination: destination

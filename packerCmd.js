@@ -16,16 +16,18 @@ module.exports = function(){
       cmd += file + ' '
     }
 
-    Object.keys(options).forEach(function(option){
-        var value = '-' + options[option]
-        if(options[option] instanceof 'array'){
-          value = '=' + options[option].join(',') + ' '
-        } else if(options[option] !== true){
-          value = '=' + options[option] + ' '
-        } else {
-          cmd += '-' + option + '=' + options[option]
-        }
-    })
+    if(options){
+      Object.keys(options).forEach(function(option){
+          var value = '-' + options[option]
+          if(options[option] instanceof 'array'){
+            value = '=' + options[option].join(',') + ' '
+          } else if(options[option] !== true){
+            value = '=' + options[option] + ' '
+          } else {
+            cmd += '-' + option + '=' + options[option]
+          }
+      })
+    }
 
     return cmd
 
@@ -66,19 +68,20 @@ module.exports = function(){
   }
 
   packerCmd.build = function(file, options, cb){
+    var self = this
     //If options aren't passed in, use default options
     if(typeof options == 'function'){
       cb = options
       options = {}
     }
 
-    exec(this.command('build', file, options), function(err, stdout, stderr){
+    exec(self.command('build', file, options), function(err, stdout, stderr){
       if(err){
         cb(err)
       } else if(stderr){
-        cb(this.formatOutput(stderr))
+        cb(self.formatOutput(stderr))
       } else {
-        cb(null, this.formatOutput(stdout))
+        cb(null, self.formatOutput(stdout))
       }
     })
   }
