@@ -45,14 +45,13 @@ module.exports = function(){
       self.filename = Math.random().toString(36).slice(2) + '.json'
     }
 
-    fs.writeFile(self.fileDirectory + '/' + self.filename, JSON.stringify(
-      {
-        variables: self.variables,
-        builders: self.builders,
-        provisioners: self.provisioners,
-        "post-processors": self['post-Processors']
-      }
-    ), cb)
+    if(!cb){
+      cb = function(){}
+    }
+
+    fs.writeFile(self.fileDirectory + '/' + self.filename, JSON.stringify(self.json()), cb)
+
+    return self
   }
 
   //Build will either use the file in the filename (if it exists) and execute OR
@@ -67,20 +66,24 @@ module.exports = function(){
     }
 
     if(self.filename){
+      if(!cb){
+        cb = function(){}
+      }
       packerCmd.build(self.fileDirectory + '/' + self.filename, opts, cb)
     } else {
       self.write(function(err){
-        if(err){
+        if(err && cb){
           cb(err)
         } else {
           packerCmd.build(self.fileDirectory + '/' + self.filename, opts, function(err, output){
             err ? cb(err, output) : self.clean(function(err){
-              cb(err, output)
+              cb ? cb(err, output) : null
             })
           })
         }
       })
     }
+    return self
   }
 
   //Read the current set filename and set its values to the current PackerFile object
@@ -100,9 +103,11 @@ module.exports = function(){
           cb(null)
         }
       })
-    } else {
+    } else if(cb){
       cb(null)
     }
+
+    return self
   }
 
   //If the filename exists, destory the file
@@ -110,8 +115,21 @@ module.exports = function(){
     var self = this
     if(self.filename){
       fs.unlink(self.fileDirectory + '/' + self.filename, cb)
-    } else {
+    } else if(cb){
       cb(null)
+    }
+
+    return self
+  }
+
+  //JSON function to provide a clean JSON representation of what's in a packer file
+  PackerFile.prototype.json = function(){
+    var self = this
+    return {
+      variables: self.variables,
+      builders: self.builders,
+      provisioners: self.provisioners,
+      "post-processors": self['post-Processors']
     }
   }
 
@@ -134,13 +152,16 @@ module.exports = function(){
 
       self.builders.push(builder)
     }
+
+
+    return self
   }
 
   //Amazon helper function
   PackerFile.prototype.addAmazonEBS = function(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts){
     var self = this
     if(typeof access_key == 'object'){
-      self.addBuilder('amazon-ebs', access_key)
+      return self.addBuilder('amazon-ebs', access_key)
     } else {
       opts = opts || {}
       opts.ami_name = opts.ami_name || 'Packer.io generated instance - ' + (new Date()).getTime()
@@ -150,7 +171,7 @@ module.exports = function(){
       opts.region = region
       opts.source_ami = source_ami
       opts.ssh_username = ssh_username
-      self.addBuilder('amazon-ebs', opts)
+      return self.addBuilder('amazon-ebs', opts)
     }
   }
 
@@ -169,6 +190,8 @@ module.exports = function(){
 
       self.provisioners.push(opts)
     }
+
+    return self
   }
 
   //If the last provisioner added was a shell command, add it to that.
@@ -189,9 +212,9 @@ module.exports = function(){
         cmds.forEach(function(cmd){
           self.provisioners[self.provisioners.length - 1].inline.push(cmd)
         })
-
+        return self
     } else {
-      self.provisioners.push({
+      return self.provisioners.push({
         type: 'shell',
         inline: cmds
       })
@@ -205,6 +228,8 @@ module.exports = function(){
       source: source,
       destination: destination
     })
+
+    return self
   }
 
   return PackerFile
