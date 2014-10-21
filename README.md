@@ -12,12 +12,13 @@ A convenient wrapper module to control Packer.IO
    .build()
 ```
 
+This is a BETA module. Pull requests, input, stories of the module in use, and constructive criticisms are highly welcome. I'll try to be active in maintaining.
+
 The Basics
 ----
 
 Packer.IO is a very useful command line application to generate server images across a multitude of services such as Amazon, Heroku, or local applications such as Docker or VirtualBox. It was created by Hashicorp, of which I am not associated with beyond being a fan.  I've created a node wrapper to allow me to programmatically control the tool as part of a larger project, and am sharing the results here.
 
-This is a BETA module. Pull requests, input, stories of the module in use, and constructive criticisms are highly welcome. I'll try to be active in maintaining.
 
 Installation
 ----------
@@ -124,3 +125,116 @@ newImage.addAmazonEBS(process.env.AMAZON_ACCESS_TOKEN,
 
 All commands are chainable, or can be standalone.
 
+All PackerFile objects have the following attributes:
+* filePath - the current filepath of the PackerFile. Can be null if it's only being worked on in memory.
+* builders - an [] of builder objects
+* provisioners - an [] of provisioner objects
+* variables - an [] of variable objects
+* post-processors - an [] of post-processor objects
+
+
+new PackerFile()
+---
+```
+var packerFile = new PackerFile(opts)
+```
+* opts - an optional parameter. If it's passed in, it has all attributes for the PackerFile. If the filePath is included, it will immediately call this.read()
+
+
+PackerFile.filePath
+---
+```
+packerFile.filePath(filePath)
+```
+Equivalent to packerFile.filePath = 'something', but allows function chaining.
+
+
+PackerFile.write
+---
+```
+packerFile.write([workingDirectory,] cb)
+```
+Will write the PackerFile in memory to a file. If there is a filePath set, it will attempt to write to that file path. Otherwise it will generate one with a random file name. If workingDirectory is provided, it shall use that directory to generate the file. Otherwise, it will work locally (whatever './' is at the time)
+
+Callback example:
+```
+packerFile.write(function(err){
+ if(err){
+  console.log('Oh noes!', err)
+ } else {
+  console.log("Hooray!")
+ }
+})
+```
+
+PackerFile.build
+---
+```
+packerFile.build([opts,] cb)
+```
+Will attempt a build by calling packerCmd.build. The opts parameter is optional. If filePath is set, it shall immediately start the build on that file and NOT write. If there is no filePath set, then it will call write() and, upon completion (either success or failure) shall call .clean()
+
+Callback example:
+```
+packerFile.build(function(err, output){
+ if(err){
+  console.log("Fiddlesticks! Something went wrong :-(", err)
+ } else {
+  console.log("The formatted output from the build:", output)
+ }
+
+})
+```
+
+PackerFile.read
+---
+```
+packerFile.read(cb)
+```
+Will read the current filePath, if any. It shall then convert it to a JSON file and attempt to assign them from the PackerFile. Useful if you have pre-written PackerFiles that you want to start manipulating/build off of.
+
+Callback example:
+```
+packerFile.write(function(err){
+ if(err){
+  console.log('Oh gum drops :-/', err)
+ } else {
+  console.log("My life has never been greater - it worked")
+ }
+})
+```
+
+PackerFile.clean
+---
+```
+packerFile.clean(cb)
+```
+Will destroy the filePath, if it exists. This is called by build if you call it without a filePath set.
+
+Callback example:
+```
+packerFile.write(function(err){
+ if(err){
+  console.log('The system ignored our request', err)
+ } else {
+  console.log("Squeaky clean")
+ }
+})
+```
+
+PackerFile.json
+---
+```
+packerFile.json()
+```
+Returns the same JSON we write to the Packer file in .write()
+
+
+Builders
+===
+
+Provisioners
+===
+
+Post-Processors
+===
