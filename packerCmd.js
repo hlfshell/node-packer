@@ -33,96 +33,6 @@ module.exports = function(){
 
   }
 
-  packerCmd.formatOutput = function(output, type){
-    if(type == 'raw'){
-      return output
-    }
-    //Split the text into an array, delimited by new lines
-    var outputArr = output.split('\n')
-
-    //Go through each, formatting it into a more workable format
-    outputArr.forEach(function(result, index){
-      //Split each result item into an array using the comma delimiter
-      outputArr[index] = result.split(',')
-
-      //Replace all instances of %!(PACKER_COMMA) with a ,
-      //Yes, the innerIndex is ugly, I'm sorry.
-      outputArr[index].forEach(function(item, innerIndex){
-          outputArr[index][innerIndex] = outputArr[index][innerIndex].replace('%!(PACKER_COMMA)', ',')
-      })
-    })
-
-    if(type == 'delimited'){
-      return outputArr
-    }
-
-    //Now that we have outputArr as an array of arrays, let's build an easier
-    //results object
-    // var results = []
-    // outputArr.forEach(function(line){
-    //   if(line.length < 3){
-    //     results.push({ error: 'Could not parse output', output: line })
-    //   } else {
-    //     results.push({
-    //       timestamp: line[0],
-    //       target: line[1],
-    //       type: line[2],
-    //       data: line.length >= 4 ? line.length > 4 ? line.slice(3, line.length) : line[3] : null
-    //     })
-    //   }
-    // })
-    // return results
-    var results = { }
-
-    //Build the results object whereever possible
-    outputArr.forEach(function(line){
-      //Sometimes, the end can have a blank line. If this is the case, ignore the line
-      if(line.length < 4){
-        return
-      }
-
-      //Find the target of the message
-      var target = line[1] == "" ? 'packer' : line[1]
-
-      //If the target doesn't exist for the results message yet, add it
-      if(Object.keys(results).indexOf(target == -1)){
-          results[target] = {}
-      }
-
-      //Set line[3] to be the data. It may be one item, or many items.
-      line.length > 4 ? line[3] = line.slice(3, line.length) : line[3]
-
-      //Find if the type exists. If not, continue. Otherwise, make it an array
-      //if needed and append
-      if(Object.keys(results[target]).indexOf(line[2] != -1)){
-        //If it's not an array already, turn it into one
-        if(! (results[target][line[2]] instanceof Array) ){
-          results[target][line[2]] = [ results[target][line[2]] ]
-        }
-
-        //Add it to the current data
-        line[3] instanceof Array ? results[target][line[2]].concat(line[3]) :
-          results[target][line[2]].push(line[3])
-
-      } else {
-        //Otherwise just assign it
-        results[target][line[2]] = line[3]
-      }
-
-    })
-
-    if(type == 'all'){
-      return {
-        raw: output,
-        delimited: outputArr,
-        formatted: results
-      }
-    } else {
-      return results
-    }
-
-  }
-
   packerCmd.build = function(file, options, cb){
     var self = this
     //If options aren't passed in, use default options
@@ -135,8 +45,6 @@ module.exports = function(){
       if(err){
         cb(err)
       } else {
-        // cb(null, self.formatOutput(stdout))
-
         //Format the output
         outputArr = stdout.split('\n')
         //Go through each, formatting it into a more workable format
@@ -164,76 +72,56 @@ module.exports = function(){
           if(line.length < 4){
             return
           }
-
           //We also only care about messages for builders, not packer
           if(builder == ''){
             return
           }
-
           if(!results[builder]){
             results[builder] = { }
           }
-
           if(type == 'error-count'){
             if(!errors){
               errors = {}
             }
-
             if(!errors[builder]){
               errors[builder] = {}
             }
-
             errors[builder]['error-count'] = data
-
           } else if(type == 'error'){
             if(!errors){
               errors = {}
             }
-
             if(!errors[builder]){
               errors[builder] = {}
             }
-
             if(!errors[builder].error){
               errors[builder].error = data
             } else {
               if(!(results[builder].error instanceof Array)){
                 results[builder].error = [results[builder].error]
               }
-
               results[builder].error.push(data)
             }
-
           } else if(type =='artifact-count'){
-
             results[builder]['artifact-count'] = data
-
           } else if(type == 'artifact'){
-
             var artifactIndex = data[0],
               dataDescriptor = data[1]
 
             if(!results[builder].artifacts){
               results[builder].artifacts = {}
             }
-
             if(!results[builder].artifacts[artifactIndex]){
               results[builder].artifacts[artifactIndex] = {}
             }
-
             if(data.length > 2){
                 results[builder].artifacts[artifactIndex][dataDescriptor] = data.length > 4 ? data.splice(2, data.length) : data[2]
             }
-
             if(dataDescriptor == 'id'){
               results[builder].artifacts[artifactIndex].image = data[2].split(':')[1]
               results[builder].artifacts[artifactIndex].region = data[2].split(':')[0]
             }
-
-
           }
-
-
         })
 
         Object.keys(results).forEach(function(builder){
