@@ -1,7 +1,7 @@
 
 module.exports = {
 
-  packerCmdLine: require('./packerCmd')(),
-  PackerFile: require('./PackerFile')()
+  packerCmdLine: require('./lib/packerCmd/packerCmd')(),
+  PackerFile: require('./lib/PackerFile/PackerFile')()
 
 }
