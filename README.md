@@ -75,14 +75,14 @@ Packer is a very useful command line application to generate server images acros
 
 ## Installation
 ```
-npm install node-packerio
+npm install node-packer
 ```
 
 
 ## Usage
 ```
-var packerCmd = require('node-packerio').packerCmd
-var PackerFile = require('node-packerio').PackerFile
+var packerCmd = require('node-packer').packerCmd
+var PackerFile = require('node-packer').PackerFile
 ```
 
 
@@ -151,7 +151,7 @@ outputType is stripped from the options object before being passed into the comm
 
 PackerFile allows you to do this:
 ```
-var PackerFile = require('node-packerio').PackerFile
+var PackerFile = require('node-packer').PackerFile
 
 var newImage = new PackerFile()
 newImage.addAmazonEBS(process.env.AMAZON_ACCESS_TOKEN,
