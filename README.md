@@ -148,6 +148,8 @@ packerFile.write([workingDirectory,] cb)
 ```
 Will write the PackerFile in memory to a file. If there is a filePath set, it will attempt to write to that file path. Otherwise it will generate one with a random file name. If workingDirectory is provided, it shall use that directory to generate the file. Otherwise, it will work locally (whatever './' is at the time)
 
+Please note that, while calling it without a callback is possible, and the write function is chainable, that the function is asynchronous and thus chaining more functions into it does not mean it waits for the build to be complete.
+
 Callback example:
 ```
 packerFile.write(function(err){
@@ -164,6 +166,8 @@ packerFile.write(function(err){
 packerFile.build([opts,] cb)
 ```
 Will attempt a build by calling packerCmd.build. The opts parameter is optional. If filePath is set, it shall immediately start the build on that file and NOT write. If there is no filePath set, then it will call write() and, upon completion (either success or failure) shall call .clean()
+
+Please note that, while calling it without a callback is possible, and the build function is chainable, that the function is asynchronous and thus chaining more functions into it does not mean it waits for the build to be complete.
 
 Callback example:
 ```
@@ -220,21 +224,85 @@ Returns the same JSON we write to the Packer file in .write()
 
 ## Builder functions
 
-packerFile.addBuilder = function(builderType, opts){
-packerFile.addAmazonEBS = function(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts){
-packerFile.addDigitalOcean = function(api_key, client_id, opts){
-packerFile.addDocker = function(commit, export_path, image, opts){
-packerFile.addGoogleComputeEngine = function(account_file, client_secrets_file, private_key_file, project_id, source_image, bucket_name, zone, opts){
-packerFile.addNullBuilder = function(host, ssh_username, ssh_password, ssh_private_key_file, opts){
-packerFile.addOpenStack = function(username, password, flavor, provider, image_name, source_image, opts){
-packerFile.addParallelsISO = function(parallels_tools_flavor, ssh_username, iso_url, iso_checksum, iso_checksum_type, opts){
-packerFile.addParallelsPVM = function(parallels_tools_flavor, ssh_username, source_path, opts){
-packerFile.addQEMU = function(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts){
-packerFile.addVirtualBoxISO = function(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts){
-packerFile.addVirtualBoxOVF = function(ssh_username, source_path, opts){
-packerFile.addVMWareISO = function(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts){
-packerFile.addVMWareVMX = function(ssh_username, source_path, opts){
+Buidler functions consist of a core function - addBuilder - and wrapper functions that merely, in turn, call that. All functions are chainable.
 
+All builder functions list out required or suggested required attributes from the Packer.IO documentation, with an additional opts parameter where you can specify any additional, unlisted parameters.
+
+All builder functions allow the passing of an object as its only parameter that defines the entirety of the builder. Type is not required on helper functions save addBuilder. 
+
+For additional documentation on individual builders, please refer to the (Packer.IO docs)[http://www.packer.io/docs].
+
+### PackerFile.addBuilder
+```
+packerFile.addBuilder(builderType, opts)
+```
+Core builder function. Requires type to be specified, all other options passed as a simple key/value javascript object.
+
+### PackerFile.addAmazonEBS
+```
+packerFile.addAmazonEBS(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts)
+```
+
+
+### PackerFile.addDigitalOcean
+```
+packerFile.addDigitalOcean(api_key, client_id, opts)
+```
+
+### PackerFile.addDocker
+```
+packerFile.addDocker(commit, export_path, image, opts)
+```
+
+### PackerFile.addGoogleComputeEngine
+```
+packerFile.addGoogleComputeEngine(account_file, client_secrets_file, private_key_file, project_id, source_image, bucket_name, zone, opts)
+```
+
+### PackerFile.addNullBuilder
+```
+packerFile.addNullBuilder(host, ssh_username, ssh_password, ssh_private_key_file, opts)
+```
+
+### PackerFile.addOpenStack
+```
+packerFile.addOpenStack(username, password, flavor, provider, image_name, source_image, opts){
+```
+
+### PackerFile.addParallelsISO
+```
+packerFile.addParallelsISO(parallels_tools_flavor, ssh_username, iso_url, iso_checksum, iso_checksum_type, opts)
+```
+
+### PackerFile.addParallelsPVM
+```
+packerFile.addParallelsPVM(parallels_tools_flavor, ssh_username, source_path, opts)
+```
+
+### PackerFIle.addQEMU
+```
+packerFile.addQEMU(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts)
+```
+
+### PackerFile.addVirtualBoxISO
+```
+packerFile.addVirtualBoxISO = function(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts)
+```
+
+### PackerFile.addVirtualBoxOVF
+```
+packerFile.addVirtualBoxOVF(ssh_username, source_path, opts)
+```
+
+### PackerFile.addVMWareISO
+```
+packerFile.addVMWareISO(ssh_username, iso_url, iso_checksum, iso_checksum_type, opts)
+```
+
+### PackerFile.addVMWareVMX
+```
+packerFile.addVMWareVMX(ssh_username, source_path, opts)
+```
 
 Provisioners
 ===
