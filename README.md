@@ -4,7 +4,7 @@ A convenient wrapper module to control Packer.IO
 
 ```
  var newImage = new PackerFile()
- 
+
  newImage.shellCmd('sudo apt-get update')
    .shellCmd('sudo apt-get install -y nginx mysql nodejs")
    .uploadFile('/my/app')
@@ -33,6 +33,8 @@ This is a BETA module. Pull requests, input, stories of the module in use, and c
 2. [Builder functions](#builder-functions)
   * [PackerFile.addBuilder](#packerfileaddbuilder)
   * [PackerFile.addAmazonEBS](#packerfileaddamazonebs)
+  * [PackerFile.addAmazonInstance](#packerfileaddamazoninstance)
+  * [PackerFile.addAmazonChroot] (#packerfileaddamazonchroot)
   * [PackerFile.addDigitalOcean](#packerfileadddigitalocean)
   * [PackerFile.addDocker](#packerfileadddocker)
   * [PackerFile.addGoogleComputeEngine](#packerfileaddgooglecomputeengine)
@@ -150,7 +152,7 @@ outputType is stripped from the options object before being passed into the comm
 PackerFile allows you to do this:
 ```
 var PackerFile = require('node-packerio').PackerFile
- 
+
 var newImage = new PackerFile()
 newImage.addAmazonEBS(process.env.AMAZON_ACCESS_TOKEN,
     process.env.AMAZON_SECRET_TOKEN,
@@ -279,7 +281,7 @@ Buidler functions consist of a core function - addBuilder - and wrapper function
 
 All builder functions list out required or suggested required attributes from the Packer.IO documentation, with an additional opts parameter where you can specify any additional, unlisted parameters.
 
-All builder functions allow the passing of an object as its only parameter that defines the entirety of the builder. Type is not required on helper functions save addBuilder. 
+All builder functions allow the passing of an object as its only parameter that defines the entirety of the builder. Type is not required on helper functions save addBuilder.
 
 For additional documentation on individual builders, please refer to the (Packer.IO docs)[http://www.packer.io/docs].
 
@@ -294,6 +296,15 @@ Core builder function. Requires type to be specified, all other options passed a
 packerFile.addAmazonEBS(access_key, secret_key, instance_type, region, source_ami, ssh_username, opts)
 ```
 
+### PackerFile.addAmazonInstance
+```
+packerFile.addAmazonInstance(access_key, secret_key, account_id, source_ami, ssh_username, region, instance_type, ami_name, s3_bucket, x509_cert_path, x509_key_path, opts)
+```
+
+### PackerFile.addAmazonChroot
+```
+packerFile.addAmazonChroot(access_key, secret_key, source_ami, ami_name, opts)
+```
 
 ### PackerFile.addDigitalOcean
 ```
