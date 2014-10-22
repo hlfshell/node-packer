@@ -14,7 +14,7 @@ A convenient wrapper module to control Packer.IO
 
 This is a BETA module. Pull requests, input, stories of the module in use, and constructive criticisms are highly welcome. I'll try to be active in maintaining.
 
-1. [The Basics](# The Basics)
+1. [The Basics](#The-Basics)
  * [Installation](## Installation)
  * [Usage](## Usage)
  * [packerCmd VS PackerFile](### packerCmd VS PackerFile)
