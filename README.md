@@ -1,6 +1,6 @@
-node-packerio
+node-packer
 ===================
-A convenient wrapper module to control Packer.IO
+A convenient wrapper module to control Packer
 
 ```
  var newImage = new PackerFile()
@@ -70,7 +70,7 @@ This is a BETA module. Pull requests, input, stories of the module in use, and c
 # The Basics
 
 
-Packer.IO is a very useful command line application to generate server images across a multitude of services such as Amazon, Heroku, or local applications such as Docker or VirtualBox. It was created by Hashicorp, of which I am not associated with beyond being a fan.  I've created a node wrapper to allow me to programmatically control the tool as part of a larger project, and am sharing the results here.
+Packer is a very useful command line application to generate server images across a multitude of services such as Amazon, Heroku, or local applications such as Docker or VirtualBox. It was created by Hashicorp, of which I am not associated with beyond being a fan.  I've created a node wrapper to allow me to programmatically control the tool as part of a larger project, and am sharing the results here.
 
 
 ## Installation
@@ -88,7 +88,7 @@ var PackerFile = require('node-packerio').PackerFile
 
 ### packerCmd VS PackerFile
 
-packerCmd is a command line wrapper for the build command for Packer.io. It also formats the output in a few ways. Currently, there are only a few commands in packer.io that are machine-readable compatible, and only the build command seems to make sense being built. As such, the other commands haven't been built out yet. They are TBD.
+packerCmd is a command line wrapper for the build command for Packer. It also formats the output in a few ways. Currently, there are only a few commands in Packer that are machine-readable compatible, and only the build command seems to make sense being built. As such, the other commands haven't been built out yet. They are TBD.
 
 PackerFile is a helpful class wrapped around packerCmd - you don't need to bring in packerCmd unless you need to manually control the builder.
 
@@ -96,7 +96,7 @@ In other words, packerCmd allows you to execute commands on a packer file on you
 
 
 ## Packer.io Documentation
-I will not attempt to explain every nook and cranny of required parameters or what Packer.io is doing in the background -for that, I suggest you turn to the tool's documentation: http://www.packer.io/docs
+I will not attempt to explain every nook and cranny of required parameters or what Packer.io is doing in the background -for that, I suggest you turn to the tool's [documentation](http://www.packer.io/docs).
 
 I have tried to keep paramter names the same throughout the module. If an attribute can be passed in is mentioned in the docs, it works here.
 
