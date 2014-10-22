@@ -304,8 +304,98 @@ packerFile.addVMWareISO(ssh_username, iso_url, iso_checksum, iso_checksum_type, 
 packerFile.addVMWareVMX(ssh_username, source_path, opts)
 ```
 
-Provisioners
-===
+## Provisioner functions
 
-Post-Processors
-===
+Provisioner functions add, in order of calling, the provisioner to the Packer File. They are all built off of addProvisioner, and follow the same convention as builders - they can accept a single object as the first and only attribute.
+
+### PackerFile.addProvisioner
+```
+packerFile.addProvisioner(provisionerType, opts)
+```
+Core provisioner function - all other provisioner functions use this.
+
+### PackerFile.shellCmd
+```
+packerFile.shellCmd(cmds[, force])
+```
+Shell command has a unique attribute and approach compared to normal provisioners. The cmds variable accepts either a string or array of strings. If the last provisioner added was also a shell cmd, it will append the commands to the inline/shell command provisioner instead of creating a new provisioner. This can be overruled by setting force to true.
+
+### PackerFile.uploadFile
+```
+packerFile.uploadFile(source, destination)
+```
+
+### PackerFile.ansible
+```
+packerFile.ansible(playbook_file, opts)
+```
+
+### Packer.chefClient
+```
+packerFile.chefClient(node_name, opts)
+```
+
+### PackerFile.chefSolo
+```
+packerFile.chefSolo(run_list, opts)
+```
+
+### PackerFile.puppetMasterless
+```
+packerFile.puppetMasterless(manifest_file, opts)
+```
+
+### PackerFile.saltMasterless
+```
+packerFile.saltMasterless(local_state_tree, opts)
+```
+
+
+## Post-Processors
+
+Post-Processors can be added and manipulated in PackerFile, but beyond that the management of each post-processor is left as an exercise to the user for now. They work the same way as provisioners above.
+
+### PackerFile.addPostProcessor
+```
+packerFile.addPostProcessor(processorType, opts)
+```
+
+### PackerFile.compress
+```
+packerFile.compress(path)
+```
+
+### PackerFile.dockerImport
+```
+packerFile.dockerImport(repository, tag)
+```
+
+### PackerFile.dockerPush
+```
+packerFile.dockerPush(opts)
+```
+
+### PackerFile.dockerSave
+```
+packerFile.dockerSave(path)
+```
+
+### PackerFile.dockerTag
+```
+packerFile.dockerTag(repository, tag)
+```
+
+### PackerFile.vagrant
+```
+packerFile.vagrant(opts)
+```
+
+### PackerFile.vagrantCloud
+```  
+packerFile.vagrantCloud(access_token, box_tag, version, opts)
+```
+
+### PackerFile.vsphere
+```
+packerFile.vsphere(username, password, host, datacenter, cluster, resource_pool, vm_name, opts)
+```
