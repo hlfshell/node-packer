@@ -308,7 +308,7 @@ packerFile.addAmazonChroot(access_key, secret_key, source_ami, ami_name, opts)
 
 ### PackerFile.addDigitalOcean
 ```
-packerFile.addDigitalOcean(api_key, client_id, opts)
+packerFile.addDigitalOcean(api_token, opts)
 ```
 
 ### PackerFile.addDocker
